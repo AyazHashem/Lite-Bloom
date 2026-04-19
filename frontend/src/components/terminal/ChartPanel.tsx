@@ -1,214 +1,275 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Box, Typography, CircularProgress, Chip }  from '@mui/material'
+import { useState, useCallback } from 'react'
+import { Box, Typography, CircularProgress } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
+import IconButton from '@mui/material/IconButton'
 import LightweightChart from '@/components/charts/LightweightChart'
-import { MarketHistoryResponse, Quote } from '@/types/market'
-import api from '@/services/api'
-import MarketBadge from '@/components/shared/MarketBadge'
-import DelayBadge from '@/components/shared/DelayBadge'
+import ChartToolbar from './ChartToolbar'
+import StatCard from '@/components/shared/StatCard'
+import { useMarketData } from '@/hooks/useMarketData'
+import {
+    formatPrice,
+    formatChangeFull,
+    formatVolume,
+    formatMarketCap,
+    formatPE,
+    formatYield,
+    getChangeColor,
+    CURRENCY_SYMBOLS,
+} from '@/lib/formatters'
+import {
+    TIMEFRAMES,
+    TimeframeOption,
+    DEFAULT_CHART_PERIOD,
+    DEFAULT_CHART_INTERVAL,
+} from '@/lib/constants'
+
 interface ChartPanelProps {
-    symbol: string
-    period?: string
-    interval?: string
+    symbol:       string
+    onClose?:     () => void
+    onFocus?:     () => void
+    isFocused?:   boolean
+    showClose?:   boolean
+}
+
+// Map symbol prefix to likely exchange
+function guessExchange(symbol: string): string {
+    if (symbol.endsWith('.L'))   return 'LSE'
+    if (symbol.endsWith('.T'))   return 'TSE'
+    if (symbol.endsWith('.HK'))  return 'HKEX'
+    if (symbol.endsWith('.SI'))  return 'SGX'
+    if (symbol.endsWith('.SR'))  return 'TADAWUL'
+    if (symbol.includes('-USD') || symbol.includes('/USD')) return 'CRYPTO'
+    if (symbol.endsWith('=F'))   return 'COMMODITIES'
+    return 'NYSE'
 }
 
 export default function ChartPanel({
-    symbol,
-    period = '1mo',
-    interval = '1d',
+    symbol:        initialSymbol,
+    onClose,
+    onFocus,
+    isFocused = false,
+    showClose = true,
 }: ChartPanelProps) {
-    const [history, setHistory] = useState<MarketHistoryResponse | null>(null)
-    const [quote, setQuote] = useState<Quote | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [symbol,    setSymbol]    = useState(initialSymbol)
+    const [symName,   setSymName]   = useState(initialSymbol)
+    const [timeframe, setTimeframe] = useState<TimeframeOption>(
+        TIMEFRAMES.find(tf => tf.label === '1M') ?? TIMEFRAMES[2]
+    )
+    const [chartType, setChartType] = useState<'candlestick' | 'line'>('candlestick')
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true)
-            setError(null)
+    const exchange = guessExchange(symbol)
 
-            try {
-                const [historyRes, quoteRes] = await Promise.all([
-                    api.get<MarketHistoryResponse>(
-                        `/api/market/history/${symbol}?period=${period}&interval=${interval}`
-                    ),
-                    api.get<Quote>(`/api/market/quote/${symbol}`),
-                ])
+    const { quote, history, loading, error } = useMarketData(
+        symbol,
+        timeframe.period,
+        timeframe.interval
+    )
 
-                setHistory(historyRes.data)
-                setQuote(quoteRes.data)
-            } catch (err) {
-                console.error(`Failed to fetch data for ${symbol}:`, err)
-                setError(`Failed to load data for ${symbol}`)
-            } finally {
-                setLoading(false)
-            }
-        }
+    const handleSymbolChange = useCallback((sym: string, name: string) => {
+        setSymbol(sym)
+        setSymName(name)
+    }, [])
 
-        fetchData()
-    }, [symbol, period, interval])
+    const changeColor = getChangeColor(quote?.change_percent)
+    const currencySymbol = CURRENCY_SYMBOLS[quote?.currency ?? 'USD'] ?? '$'
 
-    const isPositive = quote ? quote.change >= 0 : true
-    const changeColor = isPositive ? '#26a69a' : '#ef5350'
-    const delayLabel = 
-    history?.delay_minutes === 0
-    ? 'Live'
-    : history?.delay_minutes === 15
-    ? '15 min delay'
-    : `~${history?.delay_minutes} minute delay`
+    const stats = quote ? [
+        {
+            label:   'OPEN',
+            value:   formatPrice(quote.price - (quote.change ?? 0), quote.currency),
+            tooltip: 'Opening price',
+        },
+        {
+            label:   'CHANGE',
+            value:   formatChangeFull(quote.change, quote.change_percent),
+            color:   changeColor,
+            tooltip: '24h price change',
+        },
+        {
+            label:   'VOLUME',
+            value:   formatVolume(quote.volume),
+            tooltip: 'Trading volume',
+        },
+        {
+            label:   'EXCH',
+            value:   quote.exchange,
+            tooltip: 'Exchange',
+        },
+    ] : []
 
     return (
         <Box
+        onClick={onFocus}
         sx={{
-            display: 'flex',
+            display:       'flex',
             flexDirection: 'column',
-            height: '100%',
-            backgroundColor: '#0a0a0a',
-            border: '1px solid #1e2130',
-            borderRadius: 1,
-            overflow: 'hidden',
+            height:        '100%',
+            backgroundColor: '#0d1117',
+            border:        `1px solid ${isFocused ? '#1f6feb' : '#21262d'}`,
+            borderRadius:  1,
+            overflow:      'hidden',
+            cursor:        onFocus ? 'pointer' : 'default',
+            transition:    'border-color 0.15s',
         }}
         >
-            {}
+            {/* Panel header */}
             <Box
             sx={{
-                display: 'flex',
-                alignItems: 'center',
+                display:        'flex',
+                alignItems:     'center',
                 justifyContent: 'space-between',
-                px: 2,
-                py: 1,
-                borderBottom: '1px solid #1e2130',
-                flexShrink: 0,
+                px:             1.5,
+                py:             0.75,
+                borderBottom:   '1px solid #21262d',
+                flexShrink:     0,
+                backgroundColor: '#161b22',
             }}
             >
-                {}
-                <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1
-                }}>
+                {/* Symbol + name */}
+                <Box>
                     <Typography
-                    variant="subtitle1"
                     sx={{
-                        color: '#ffffff', fontWeight: 700, fontFamily: 'monospace'
-                    }}>
+                        fontSize:   '0.82rem',
+                        fontFamily: 'monospace',
+                        fontWeight: 700,
+                        color:      '#cdd9e5',
+                        lineHeight: 1,
+                    }}
+                    >
                         {symbol}
                     </Typography>
-                    {quote && (
-                        <Typography
-                        variant="caption"
-                        sx={{ color: '#758696'}}
-                        >
-                            {quote.name}
-                        </Typography>
-                    )}
+                    <Typography sx={{ fontSize: '0.6rem', color: '#7d8590' }}>
+                        {quote?.name ?? symName}
+                    </Typography>
                 </Box>
+
+                {/* Price */}
                 {quote && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Box sx={{ textAlign: 'right' }}>
                         <Typography
-                        variant="subtitle1"
-                        sx={{ color: '#ffffff', fontWeight: 600, fontFamily: 'monospace'}}
-                        >
-                            {quote.currency === 'USD' ? '$' : ''}
-                            {quote.price.toLocaleString(undefined, {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2.
-                            })}
-                        </Typography>
-                        <Typography
-                        variant="caption"
-                        sx={{ color: changeColor, fontFamily: 'monospace' }}
-                        >
-                            {isPositive ? '+' : ''}
-                            {quote.change.toFixed(2)} ({isPositive ? '+' : ''}
-                            {quote.change_percent.toFixed(2)}%)
-                        </Typography>
-                        <Chip
-                        label={delayLabel}
-                        size="small"
                         sx={{
-                            backgroundColor:
-                                history?.delay_minutes === 0 ? '#1a3a2a' : '#2a2a1a',
-                            color:
-                                history?.delay_minutes === 0 ? '#26a69a' : '#b0a030',
-                            fontSize: '0.65rem',
-                            height: 18,
+                            fontSize:   '0.9rem',
+                            fontFamily: 'monospace',
+                            fontWeight: 700,
+                            color:      '#cdd9e5',
+                            lineHeight: 1,
                         }}
-                        />
+                        >
+                            {formatPrice(quote.price, quote.currency)}
+                        </Typography>
+                        <Typography
+                        sx={{
+                            fontSize:   '0.68rem',
+                            fontFamily: 'monospace',
+                            color:      changeColor,
+                        }}
+                        >
+                            {formatChangeFull(quote.change, quote.change_percent)}
+                        </Typography>
                     </Box>
                 )}
+
+                {/* Close button */}
+                {showClose && onClose && (
+                    <IconButton
+                    size="small"
+                    onClick={e => { e.stopPropagation(); onClose() }}
+                    sx={{
+                        ml:      0.5,
+                        padding: '3px',
+                        color:   '#7d8590',
+                        '&:hover': { color: '#f85149', backgroundColor: 'rgba(248,81,73,0.1)' },
+                    }}
+                    >
+                        <CloseIcon sx={{ fontSize: 14 }} />
+                    </IconButton>
+                )}
             </Box>
-            <Box sx={{ flex: 1, position: 'relative', minHeight: 0}}>
+
+            {/* Toolbar */}
+            <ChartToolbar
+            symbol={symbol}
+            exchange={exchange}
+            timeframe={timeframe}
+            chartType={chartType}
+            delayMinutes={quote?.delay_minutes}
+            onSymbolChange={handleSymbolChange}
+            onTimeframeChange={setTimeframe}
+            onChartTypeChange={setChartType}
+            />
+
+            {/* Chart area */}
+            <Box sx={{ flex: 1, position: 'relative', minHeight: 0 }}>
                 {loading && (
                     <Box
                     sx={{
-                        position: 'absolute',
-                        inset: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: '#0a0a0a',
-                        zIndex: 1,
-                    }}>
-                        <CircularProgress size={32} sx={{ color: '#26a69a' }}/>
+                        position:        'absolute',
+                        inset:           0,
+                        display:         'flex',
+                        alignItems:      'center',
+                        justifyContent:  'center',
+                        backgroundColor: '#0d1117',
+                        zIndex:          1,
+                    }}
+                    >
+                        <CircularProgress size={28} sx={{ color: '#1f6feb' }} />
                     </Box>
                 )}
 
-                {error && (
+                {error && !loading && (
                     <Box
                     sx={{
-                        position: 'absolute',
-                        inset: 0,
-                        display: 'flex',
-                        alignItems: 'center',
+                        position:       'absolute',
+                        inset:          0,
+                        display:        'flex',
+                        flexDirection:  'column',
+                        alignItems:     'center',
                         justifyContent: 'center',
-                    }}>
-                        <Typography variant="body2" sx={{ color: '#ef5350' }}>
+                        gap:            1,
+                    }}
+                    >
+                        <Typography sx={{ fontSize: '0.75rem', color: '#f85149' }}>
                             {error}
+                        </Typography>
+                        <Typography sx={{ fontSize: '0.65rem', color: '#4a5568' }}>
+                            Check symbol and try again
                         </Typography>
                     </Box>
                 )}
 
-                {!loading && !error && history && (
-                    <LightweightChart data={history.bars} />
+                {!loading && !error && history?.bars && history.bars.length > 0 && (
+                    <LightweightChart
+                    data={history.bars}
+                    chartType={chartType}
+                    />
                 )}
             </Box>
 
-            {quote && (
+            {/* Stats footer */}
+            {stats.length > 0 && (
                 <Box
                 sx={{
-                    display: 'flex',
-                    gap: 3,
-                    px: 2,
-                    py: 0.75,
-                    borderTop: '1px solid #1e2130',
-                    flexShrink: 0,
-                }}>
-                    {[
-                        { label: 'VOL', value: (quote.volume / 1_000_000).toFixed(2) + 'M', },
-                        { label: 'EXCH', value: quote.exchange },
-                        { label: 'CCY', value: quote.currency },
-                    ].map((stat) => (
-                        <Box key={stat.label}>
-                            <Typography
-                            variant="caption"
-                            sx={{ color: '#758696', display: 'block', fontSize: '0.6rem'}}
-                            >
-                                {stat.label}
-                            </Typography>
-                            <Typography
-                            variant="caption"
-                            sx={{
-                                color: '#d1d4dc',
-                                fontFamily: 'monospace',
-                                fontSize: '0.7rem'
-                            }}
-                            >
-                                {stat.value}
-                            </Typography>
-                        </Box>
+                    display:      'flex',
+                    gap:          0.75,
+                    px:           1.5,
+                    py:           0.75,
+                    borderTop:    '1px solid #21262d',
+                    flexShrink:   0,
+                    overflowX:    'auto',
+                    '&::-webkit-scrollbar': { display: 'none' },
+                }}
+                >
+                    {stats.map(stat => (
+                        <StatCard
+                        key={stat.label}
+                        label={stat.label}
+                        value={stat.value}
+                        color={stat.color}
+                        tooltip={stat.tooltip}
+                        compact
+                        />
                     ))}
                 </Box>
             )}

@@ -1,7 +1,7 @@
 'use client'
 
 import { Box, Typography, CircularProgress } from '@mui/material'
-import Sparkline from '@/components/shared/SparkLine'
+import Sparkline from '@/components/shared/Sparkline'
 import PriceChange from '@/components/shared/PriceChange'
 import WatchlistButton from '@/components/shared/WatchlistButton'
 import { useCrypto } from '@/hooks/useLandingData'

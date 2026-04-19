@@ -1,9 +1,10 @@
 'use client'
 
 import { Box, Typography } from '@mui/material'
-import Sparkline from '@/components/shared/SparkLine'
+import Sparkline from '@/components/shared/Sparkline'
 import PriceChange from '@/components/shared/PriceChange'
 import WatchlistButton from '@/components/shared/WatchlistButton'
+import DelayBadge from '@/components/shared/DelayBadge'
 
 interface StockRowProps {
     stock: any
@@ -38,7 +39,7 @@ export default function StockRow({
         <Box
         sx={{
             display: 'grid',
-            gridTemplateColumns: '1.5fr 1fr 1fr 0.8fr 0.8fr 1fr 80px 30px',
+            gridTemplateColumns: '1.5fr 1fr 1fr 0.8fr 0.8fr 0.8fr 1fr 80px 50px 30px',
             alignItems: 'center',
             px: 2,
             py: 0.75,
@@ -50,15 +51,11 @@ export default function StockRow({
             <Box>
                 <Typography
                 sx={{
-                display: 'grid',
-                gridTemplateColumns: '1.5fr 1fr 1fr 0.8fr 0.8fr 1fr 80px 30px',
-                alignItems: 'center',
-                px: 2,
-                py: 0.75,
-                borderBottom: '1px solid #21262d',
-                '&:hover': { backgroundColor: '#1c2128' },
-                cursor: 'default',
-            }}
+                    fontSize: '0.75rem',
+                    fontFamily: 'monospace',
+                    fontWeight: 700,
+                    color: '#cdd9e5',
+                }}
                 >
                     {stock.symbol}
                 </Typography>
@@ -107,7 +104,7 @@ export default function StockRow({
                     color: '#7d8590',
                 }}
                 >
-                    0: {formatPrice(stock.open)}
+                    O: {formatPrice(stock.open)}
                 </Typography>
                 <Typography
                 sx={{
@@ -129,6 +126,7 @@ export default function StockRow({
                 ) : (
                 <Box sx={{ width: 80 }} />
             )}
+            <DelayBadge delayMinutes={stock.delay_minutes ?? 15} size="small" />
             <WatchlistButton symbol={stock.symbol} name={stock.name} />
         </Box>
     )

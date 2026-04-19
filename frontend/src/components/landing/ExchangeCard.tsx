@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Box, Typography, Tab, Tabs } from '@mui/material'
-import Sparkline from '@/components/shared/SparkLine'
+import Sparkline from '@/components/shared/Sparkline'
 import PriceChange from '@/components/shared/PriceChange'
 import MarketBadge from '@/components/shared/MarketBadge'
 import WatchlistButton from '@/components/shared/WatchlistButton'
@@ -68,7 +68,10 @@ export default function ExchangeCard({
                         </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.25 }}>
-                        <MarketBadge isOpen={is_open} />
+                        <MarketBadge isOpen={is_open}
+                        delayMinutes={composite?.delay_minutes}
+                        size="small"
+                        showDelay={true} />
                         <WatchlistButton
                         symbol={composite.symbol}
                         name={composite.name}

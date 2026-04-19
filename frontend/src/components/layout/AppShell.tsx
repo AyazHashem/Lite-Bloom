@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+'use client'
+
+import { useState } from "react";
 import { Box } from "@mui/material";
 import LeftSidebar from './LeftSidebar'
 import RightSidebar from './RightSidebar'

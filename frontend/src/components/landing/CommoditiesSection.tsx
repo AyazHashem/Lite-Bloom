@@ -1,10 +1,11 @@
 'use client'
 
 import { Box, Typography, CircularProgress } from '@mui/material'
-import Sparkline from '@/components/shared/SparkLine'
+import Sparkline from '@/components/shared/Sparkline'
 import PriceChange from '@/components/shared/PriceChange'
 import WatchlistButton from '@/components/shared/WatchlistButton'
 import { useCommodities } from '@/hooks/useLandingData'
+import { StockRowSkeleton } from '@/components/shared/LoadingSkeleton'
 
 const COLUMN_HEADERS = [
     'Name', 'Type', 'Price', 'Change', 'Volume', '24H High', '24H Low', 'Unit', 'Trend', ''
@@ -64,9 +65,7 @@ export default function CommoditiesSection() {
             </Box>
 
             {loading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-                    <CircularProgress size={22} sx={{ color: '#1f6feb' }} />
-                </Box>
+                Array.from({ length: 6 }).map((_, i) => <StockRowSkeleton key={i} />)
                 ) : (
                     commodities.map((commodity: any) => {
                     const isPositive = commodity.change_percent >= 0

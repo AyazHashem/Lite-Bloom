@@ -1,25 +1,31 @@
 'use client'
 
-import { useEffect, useState } from "react"
-import { Box, Typography, IconButton, Tooltip, CircularProgress } from "@mui/material"
+import { useEffect, useState } from 'react'
+import {
+    Box,
+    Typography,
+    IconButton,
+    Tooltip,
+    CircularProgress,
+} from '@mui/material'
 import PushPinIcon from '@mui/icons-material/PushPin'
 import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined'
 import CloseIcon from '@mui/icons-material/Close'
-import PriceChange from "@/components/shared/PriceChange"
-import Sparkline from "@/components/shared/SparkLine"
-import MarketBadge from "@/components/shared/MarketBadge"
-import { useWatchlist } from "@/hooks/useWatchlist"
-import { usePinnedItems } from "@/hooks/usePinnedItems"
+import PriceChange from '@/components/shared/PriceChange'
+import Sparkline from '@/components/shared/Sparkline'
+import MarketBadge from '@/components/shared/MarketBadge'
+import { useWatchlist } from '@/hooks/useWatchlist'
+import { usePinnedItems } from '@/hooks/usePinnedItems'
 import api from '@/services/api'
 
-export default function WatchlistPanel(){
+export default function WatchlistPanel() {
     const { items, removeFromWatchlist } = useWatchlist()
-    const { pinItems, unpinItem, isPinned } = usePinnedItems()
+    const { pinItem, unpinItem, isPinned } = usePinnedItems()
     const [quotes, setQuotes] = useState<Record<string, any>>({})
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        if(items.length === 0) return
+        if (items.length === 0) return
 
         const fetchQuotes = async () => {
             setLoading(true)
@@ -30,7 +36,7 @@ export default function WatchlistPanel(){
                         const res = await api.get(`/api/market/quote/${item.symbol}`)
                         results[item.symbol] = res.data
                     } catch {
-                        // Quote fails silently
+                    // Quote failed silently
                     }
                 })
             )
@@ -63,7 +69,7 @@ export default function WatchlistPanel(){
                     textAlign: 'center',
                 }}
                 >
-                    No items in watchlist
+                    No items in watchlist.
                 </Typography>
                 <Typography
                 sx={{
@@ -72,7 +78,7 @@ export default function WatchlistPanel(){
                     textAlign: 'center',
                 }}
                 >
-                    Click the bookmark icon on an instrument to add it here
+                    Click the bookmark icon on any instrument to add it here.
                 </Typography>
             </Box>
         )
@@ -101,115 +107,118 @@ export default function WatchlistPanel(){
                 const isPositive = quote ? quote.change >= 0 : true
                 const pinned = isPinned(item.symbol)
 
-                return(
-                <Box
-                key={item.symbol}
-                sx={{
-                    p: 1.5,
-                    borderBottom: '1px solid #21262d',
-                    '&:hover': { backgroundColor: '#1c2128' },
-                }}
-                >
+                return (
                     <Box
+                    key={item.symbol}
                     sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        mb: 0.5,
+                        p: 1.5,
+                        borderBottom: '1px solid #21262d',
+                        '&:hover': { backgroundColor: '#1c2128' },
                     }}
                     >
-                        <Box>
-                            <Typography
-                            sx={{
-                                fontSize: '0.78rem',
-                                fontFamily: 'monospace',
-                                fontWeight: 700,
-                                color: '#cdd9e5'
-                            }}
-                            >
-                                {item.symbol}
-                            </Typography>
-                            <Typography
-                            sx={{ fontSize: '0.6rem', color: '#7d8590' }}
-                            >
-                                {item.name}
-                            </Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', gap: 0.25 }}>
-                            <Tooltip title={pinned ? 'Unpin' : 'Pin to strip' }>
-                                <IconButton
-                                size="small"
-                                onClick={() => pinned
-                                    ? unpinItem(item.symbol)
-                                    : pinItems(item.symbol, item.name)
-                                }
-                                sx={{
-                                    padding: '2px',
-                                    color: pinned ? '#1f6feb' : '#7d8590'
-                                }}
-                                >
-                                    {
-                                        pinned
-                                        ? <PushPinIcon sx={{ fontSize: 12 }} />
-                                        : <PushPinOutlinedIcon sx={{ fontsize: 12 }} />
-                                    }
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Remove from watchlist">
-                                <IconButton
-                                size="small"
-                                onClick={() => removeFromWatchlist(item.symbol)}
-                                sx={{ padding: '2px', color: '#7d8590' }}
-                                >
-                                    <CloseIcon sx={{ fontSize: 12 }} />
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
-                    </Box>
-                    {quote ? (
+                        {/* Header row */}
                         <Box
                         sx={{
-                            displat: 'flex',
+                            display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                        }}>
+                            mb: 0.5,
+                        }}
+                        >
                             <Box>
                                 <Typography
                                 sx={{
-                                    fontSize: '0.82rem',
+                                    fontSize: '0.78rem',
                                     fontFamily: 'monospace',
-                                    fontWeight: 600,
-                                    color: '#cdd9e5'
+                                    fontWeight: 700,
+                                    color: '#cdd9e5',
                                 }}
                                 >
-                                    {quote.price?.toLocaleString(undefined, {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                    })}
+                                    {item.symbol}
                                 </Typography>
-                                <PriceChange 
-                                change={quote.change}
-                                changePercent={quote.change_percent}
-                                showBoth={false}
-                                />
+                                <Typography
+                                sx={{ fontSize: '0.6rem', color: '#7d8590' }}
+                                >
+                                    {item.name}
+                                </Typography>
                             </Box>
-                            {quote.sparkline && (
-                                <Sparkline
-                                data={quote.sparkline}
-                                width={60}
-                                height={24}
-                                positive={isPositive}
-                                />
-                            )}
+                            <Box sx={{ display: 'flex', gap: 0.25 }}>
+                                <Tooltip title={pinned ? 'Unpin' : 'Pin to strip'}>
+                                    <IconButton
+                                    size="small"
+                                    onClick={() => pinned
+                                        ? unpinItem(item.symbol)
+                                        : pinItem(item.symbol, item.name)
+                                    }
+                                    sx={{
+                                    padding: '2px',
+                                    color: pinned ? '#1f6feb' : '#7d8590',
+                                    }}
+                                    >
+                                        {pinned
+                                            ? <PushPinIcon sx={{ fontSize: 12 }} />
+                                            : <PushPinOutlinedIcon sx={{ fontSize: 12 }} />
+                                        }
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Remove from watchlist">
+                                    <IconButton
+                                    size="small"
+                                    onClick={() => removeFromWatchlist(item.symbol)}
+                                    sx={{ padding: '2px', color: '#7d8590' }}
+                                    >
+                                        <CloseIcon sx={{ fontSize: 12 }} />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
                         </Box>
-                    ) : (
-                        <Typography
-                        sx={{ fontSize: '0.65rem', color: '#4a5568' }}
-                        >
-                            Loading...
-                        </Typography>
-                    )}
-                </Box>
+
+                        {/* Price row */}
+                        {quote ? (
+                            <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                            }}
+                            >
+                                <Box>
+                                    <Typography
+                                    sx={{
+                                        fontSize: '0.82rem',
+                                        fontFamily: 'monospace',
+                                        fontWeight: 600,
+                                        color: '#cdd9e5',
+                                    }}
+                                    >
+                                        {quote.price?.toLocaleString(undefined, {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}
+                                    </Typography>
+                                    <PriceChange
+                                    change={quote.change}
+                                    changePercent={quote.change_percent}
+                                    showBoth={false}
+                                    />
+                                </Box>
+                                {quote.sparkline && (
+                                    <Sparkline
+                                    data={quote.sparkline}
+                                    width={60}
+                                    height={24}
+                                    positive={isPositive}
+                                    />
+                                )}
+                            </Box>
+                            ) : (
+                                <Typography
+                                sx={{ fontSize: '0.65rem', color: '#4a5568' }}
+                                >
+                                    Loading...
+                                </Typography>
+                        )}
+                    </Box>
                 )
             })}
         </Box>

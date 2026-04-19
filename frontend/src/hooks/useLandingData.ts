@@ -12,7 +12,7 @@ export function useMarkets(sortBy: 'gain' | 'volume' = 'gain') {
                 setLoading(true)
                 const res = await api.get(`/api/landing/markets?sort_by=${sortBy}`)
                 setData(res.data)
-            } catch (e) {
+            } catch {
                 setError('Failed to load markets')
             } finally {
                 setLoading(false)
@@ -56,5 +56,54 @@ export function useCommodities() {
     const [data, setData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
-    
+    useEffect(() => {
+        api.get('/api/landing/commoditites')
+        .then(res => setData(res.data))
+        .catch(console.error)
+        .finally(() => setLoading(false))
+    }, [])
+
+    return { data, loading }
+}
+
+export function useForex() {
+    const [data, setData] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        api.get('/api/landing/forex')
+        .then(res => setData(res.data))
+        .catch(console.error)
+        .finally(() => setLoading(false))
+    }, [])
+
+    return { data, loading }
+}
+
+export function useCrypto() {
+    const [data, setData] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        api.get('/api/landing/crypto')
+        .then(res => setData(res.data))
+        .catch(console.error)
+        .finally(() => setLoading(false))
+    }, [])
+
+    return { data, loading }
+}
+
+export function useBonds() {
+    const [data, setData] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        api.get('/api/landing/bonds')
+        .then(res => setData(res.data))
+        .catch(console.error)
+        .finally(() => setLoading(false))
+    }, [])
+
+    return { data, loading }
 }

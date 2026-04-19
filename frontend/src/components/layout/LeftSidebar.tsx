@@ -14,6 +14,7 @@ import BarChartIcon from '@mui/icons-material/BarChart'
 import SettingsIcon from '@mui/icons-material/Settings'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import UserMenu from '@/components/auth/UserMenu'
 
 const NAV_ITEMS = [
     { label: 'Dashboard', icon: DashboardIcon, path: '/' },
@@ -153,6 +154,29 @@ export default function LeftSidebar({ isOpen, onToggle}: LeftSidebarProps) {
                 {BOTTOM_ITEMS.map(item => (
                     <NavItem key={item.path} {...item} />
                 ))}
+                <Box
+                sx={{
+                    display:        'flex',
+                    alignItems:     'center',
+                    justifyContent: isOpen ? 'flex-start' : 'center',
+                    px:             isOpen ? 1.5 : 0,
+                    py:             1,
+                }}
+                >
+                    <UserMenu />
+                    {isOpen && (
+                        <Typography
+                        sx={{
+                            fontSize:   '0.72rem',
+                            color:      '#7d8590',
+                            ml:         1,
+                            fontFamily: 'monospace',
+                        }}
+                        >
+                            Account
+                        </Typography>
+                    )}
+                </Box>
             </Box>
         </Box>
     )

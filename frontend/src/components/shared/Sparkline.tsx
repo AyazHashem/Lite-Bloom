@@ -5,7 +5,7 @@ import { Box } from '@mui/material'
 
 interface SparklineProps {
     data: number[]
-    width?: number
+    width?: number | string
     height?: number
     positive?: boolean
 }
@@ -19,57 +19,59 @@ export default function Sparkline({
     const canvasRef = useRef<HTMLCanvasElement>(null)
 
     useEffect(() => {
-    if (!canvasRef.current || !data || data.length < 2) return
+        if (!canvasRef.current || !data || data.length < 2) return
 
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+        const canvas = canvasRef.current
+        const resolvedWidth = typeof width === 'number' ? width : 200
 
-    const dpr = window.devicePixelRatio || 1
-    canvas.width = width * dpr
-    canvas.height = height * dpr
-    ctx.scale(dpr, dpr)
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
 
-    ctx.clearRect(0, 0, width, height)
+        const dpr = window.devicePixelRatio || 1
+        canvas.width = resolvedWidth * dpr
+        canvas.height = height * dpr
+        ctx.scale(dpr, dpr)
 
-    const min = Math.min(...data)
-    const max = Math.max(...data)
-    const range = max - min || 1
+        ctx.clearRect(0, 0, resolvedWidth, height)
 
-    const padding = 2
-    const chartWidth = width - padding * 2
-    const chartHeight = height - padding * 2
+        const min = Math.min(...data)
+        const max = Math.max(...data)
+        const range = max - min || 1
 
-    const points = data.map((value, index) => ({
-      x: padding + (index / (data.length - 1)) * chartWidth,
-      y: padding + chartHeight - ((value - min) / range) * chartHeight,
-    }))
+        const padding = 2
+        const chartWidth = resolvedWidth - padding * 2
+        const chartHeight = height - padding * 2
+
+        const points = data.map((value, index) => ({
+            x: padding + (index / (data.length - 1)) * chartWidth,
+            y: padding + chartHeight - ((value - min) / range) * chartHeight,
+        }))
 
     // Draw gradient fill
-    const gradient = ctx.createLinearGradient(0, 0, 0, height)
-    const color = positive ? '#3fb950' : '#f85149'
-    gradient.addColorStop(0,
-        positive ? 'rgba(63, 185, 80, 0.3)' : 'rgba(248, 81, 73, 0.3)'
-    )
-    gradient.addColorStop(1, 'rgba(0,0,0,0)')
+        const gradient = ctx.createLinearGradient(0, 0, 0, height)
+        const color = positive ? '#3fb950' : '#f85149'
+        gradient.addColorStop(0,
+            positive ? 'rgba(63, 185, 80, 0.3)' : 'rgba(248, 81, 73, 0.3)'
+        )
+        gradient.addColorStop(1, 'rgba(0,0,0,0)')
 
-    ctx.beginPath()
-    ctx.moveTo(points[0].x, points[0].y)
-    points.slice(1).forEach(p => ctx.lineTo(p.x, p.y))
-    ctx.lineTo(points[points.length - 1].x, height)
-    ctx.lineTo(points[0].x, height)
-    ctx.closePath()
-    ctx.fillStyle = gradient
-    ctx.fill()
+        ctx.beginPath()
+        ctx.moveTo(points[0].x, points[0].y)
+        points.slice(1).forEach(p => ctx.lineTo(p.x, p.y))
+        ctx.lineTo(points[points.length - 1].x, height)
+        ctx.lineTo(points[0].x, height)
+        ctx.closePath()
+        ctx.fillStyle = gradient
+        ctx.fill()
 
     // Draw line
-    ctx.beginPath()
-    ctx.strokeStyle = color
-    ctx.lineWidth = 1.5
-    ctx.lineJoin = 'round'
-    ctx.moveTo(points[0].x, points[0].y)
-    points.slice(1).forEach(p => ctx.lineTo(p.x, p.y))
-    ctx.stroke()
+        ctx.beginPath()
+        ctx.strokeStyle = color
+        ctx.lineWidth = 1.5
+        ctx.lineJoin = 'round'
+        ctx.moveTo(points[0].x, points[0].y)
+        points.slice(1).forEach(p => ctx.lineTo(p.x, p.y))
+        ctx.stroke()
 
     }, [data, width, height, positive])
 
@@ -83,7 +85,9 @@ export default function Sparkline({
         >
             <canvas
             ref={canvasRef}
-            style={{ width, height, display: 'block' }}
+            style={{ width: typeof width === 'number' ? width: '100%',
+                height,
+                display: 'block' }}
             />
         </Box>
     )

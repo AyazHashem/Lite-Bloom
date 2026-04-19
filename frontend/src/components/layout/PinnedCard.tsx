@@ -2,12 +2,12 @@
 
 import { Box, Typography, IconButton, Tooltip } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
-import Sparkline from '@/components/shared/SparkLine'
+import Sparkline from '@/components/shared/Sparkline'
 import PriceChange from '@/components/shared/PriceChange'
 import MarketBadge from '@/components/shared/MarketBadge'
 import { usePinnedItems } from '@/hooks/usePinnedItems'
 
-interface PinnedCardProps{
+interface PinnedCardProps {
     symbol: string
     name: string
     quote: any
@@ -24,10 +24,33 @@ export default function PinnedCard({
     const isPositive = quote ? quote.change >= 0 : true
 
     return (
-        <Box>
+        <Box
+        sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            px: 1.5,
+            py: 0.5,
+            backgroundColor: '#1c2128',
+            border: '1px solid #21262d',
+            borderRadius: 1,
+            flexShrink: 0,
+            minWidth: displayMode === 'sparkline' ? 180 : 140,
+            position: 'relative',
+            '&:hover .close-btn': { opacity: 1 },
+        }}
+        >
+            {/* Symbol and price */}
             <Box>
-                <Box>
-                    <Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Typography
+                    sx={{
+                        fontSize: '0.72rem',
+                        fontFamily: 'monospace',
+                        fontWeight: 700,
+                        color: '#cdd9e5',
+                    }}
+                    >
                         {symbol}
                     </Typography>
                     {quote && (
@@ -37,9 +60,16 @@ export default function PinnedCard({
                         />
                     )}
                 </Box>
+
                 {quote ? (
-                    <Box>
-                        <Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                        <Typography
+                        sx={{
+                            fontSize: '0.72rem',
+                            fontFamily: 'monospace',
+                            color: '#cdd9e5',
+                        }}
+                        >
                             {quote.price?.toLocaleString(undefined, {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
@@ -51,26 +81,30 @@ export default function PinnedCard({
                         showBoth={false}
                         />
                     </Box>
-                ) : (
-                    <Typography>
-                        Loading...
-                    </Typography>
+                    ) : (
+                        <Typography sx={{ fontSize: '0.65rem', color: '#4a5568' }}>
+                            Loading...
+                        </Typography>
                 )}
+
+                {/* Stats mode — show extra info */}
                 {displayMode === 'stats' && quote && (
-                    <Box sx={{ display: 'flex', gap: 1, mt: 0.25,}}>
-                        <Typography sx={{ fontSize: '0.6rem', color: '#7d8590'}}>
+                    <Box sx={{ display: 'flex', gap: 1, mt: 0.25 }}>
+                        <Typography sx={{ fontSize: '0.6rem', color: '#7d8590' }}>
                             H: {quote.high_24h?.toFixed(2)}
                         </Typography>
-                        <Typography sx={{ fontSize: '0.6rem', color: '#7d8590'}}>
+                        <Typography sx={{ fontSize: '0.6rem', color: '#7d8590' }}>
                             L: {quote.low_24h?.toFixed(2)}
                         </Typography>
-                        <Typography sx={{ fontSize: '0.6rem', color: '#7d8590'}}>
+                        <Typography sx={{ fontSize: '0.6rem', color: '#7d8590' }}>
                             V: {((quote.volume || 0) / 1_000_000).toFixed(1)}M
                         </Typography>
                     </Box>
                 )}
             </Box>
-            {displayMode === 'sparkline' && quote?.sparkline &&(
+
+            {/* Sparkline mode */}
+            {displayMode === 'sparkline' && quote?.sparkline && (
                 <Sparkline
                 data={quote.sparkline}
                 width={70}
@@ -78,6 +112,8 @@ export default function PinnedCard({
                 positive={isPositive}
                 />
             )}
+
+            {/* Close button */}
             <IconButton
             className="close-btn"
             size="small"
