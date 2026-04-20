@@ -25,7 +25,7 @@ async def get_rate (from_currency: str, to_currency: str) -> Optional[dict]:
         return cache
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(
                 f"https://api.frankfurter.app/latest",
                 params={
@@ -81,7 +81,7 @@ async def get_historical_rates(
         return cached
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(
                 f"https://api.frankfurter.app/{start_date}...{end_date}",
                 params={

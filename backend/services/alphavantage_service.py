@@ -69,8 +69,9 @@ async def search_symbol(query: str) -> Optional[List]:
         return cached
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(
+                BASE_URL,
                 params = {
                     "function": "SYMBOL_SEARCH",
                     "keywords": query,
@@ -80,6 +81,11 @@ async def search_symbol(query: str) -> Optional[List]:
         
         if response.status_code == 200:
             data = response.json()
+            
+            if "Note" in data:
+                print("Alpha Vantage rate limit reached")
+                return []
+            
             matches = data.get("bestMatches", [])
             
             results = [

@@ -57,7 +57,7 @@ export function useCommodities() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        api.get('/api/landing/commoditites')
+        api.get('/api/landing/commodities')
         .then(res => setData(res.data))
         .catch(console.error)
         .finally(() => setLoading(false))

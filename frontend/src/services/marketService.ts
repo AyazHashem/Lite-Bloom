@@ -79,7 +79,7 @@ export const marketService = {
 
     async searchSymbols(query: string): Promise<any[]> {
         if (!query || query.length < 1) return []
-        const res = await api.get('/api/search', { params: { q: query } })
+        const res = await api.get('/api/search/', { params: { q: query } })
         return res.data
     },
 }

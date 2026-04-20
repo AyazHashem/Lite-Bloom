@@ -1,11 +1,13 @@
 import axios from 'axios'
 
+const rawAPIURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const baseURL = rawAPIURL.replace(/\/api\/?$/, '')
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+    baseURL,
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 10000,
+    timeout: 30000,
 })
 
 api.interceptors.response.use(

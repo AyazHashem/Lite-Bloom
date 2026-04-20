@@ -9,7 +9,7 @@ FINBERT_URL = "https://api-inference.huggingface.co/models/ProsusAI/finbert"
 
 async def analyze_headline(headlines: List[str]) -> Optional[List[dict]]:
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(
                 FINBERT_URL,
                 headers = {"Authorization": f"Bearer {HF_TOKEN}"},

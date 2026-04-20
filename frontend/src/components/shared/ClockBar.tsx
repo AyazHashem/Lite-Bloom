@@ -6,6 +6,47 @@ import { CLOCK_CITIES, MARKET_CONFIG } from '@/lib/constants'
 import { formatMarketTime } from '@/lib/formatters'
 import { toZonedTime } from 'date-fns-tz'
 
+function getTimeForCity(timezone: string): string {
+    try {
+        const now = toZonedTime(new Date(), timezone)
+        return now.toLocaleTimeString('en-GB', {
+            hour:   '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+        })
+    } catch {
+        return '--:--:--'
+    }
+}
+
+function isMarketOpenForCity(timezone: string): boolean {
+    try {
+        const exchangeId = Object.values(MARKET_CONFIG)
+        .find(m => m.timezone === timezone)?.id
+        if (!exchangeId) return false
+
+        const config = MARKET_CONFIG[exchangeId]
+        const now    = toZonedTime(new Date(), timezone)
+        const day    = now.getDay()
+
+        const isMiddleEast = ['TADAWUL', 'ADX', 'DFM'].includes(exchangeId)
+        if (isMiddleEast) {
+            if (day === 5 || day === 6) return false
+        } else {
+            if (day === 0 || day === 6) return false
+        }
+
+        const currentMinutes = now.getHours() * 60 + now.getMinutes()
+        const openMinutes    = config.openHour  * 60 + config.openMinute
+        const closeMinutes   = config.closeHour * 60 + config.closeMinute
+        return currentMinutes >= openMinutes && currentMinutes < closeMinutes
+    } catch {
+        return false
+    }
+}
+
+
 function isWeekend(timezone: string): boolean {
     try {
         const now = toZonedTime(new Date(), timezone)
@@ -44,12 +85,27 @@ function isMarketOpen(timezone: string): boolean {
 
 export default function ClockBar() {
     const [tick, setTick] = useState(0)
+    const [mounted, setMounted] = useState(false)
 
   // Update every second
     useEffect(() => {
+        setMounted(true)
         const timer = setInterval(() => setTick(t => t + 1), 1000)
         return () => clearInterval(timer)
     }, [])
+
+    if(!mounted) {
+        return (
+            <Box
+            sx={{
+                height:          32,
+                backgroundColor: '#161b22',
+                borderBottom:    '1px solid #21262d',
+                flexShrink:      0,
+            }}
+            />
+        )
+    }
 
     return (
         <Box

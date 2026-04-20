@@ -51,35 +51,55 @@ def get_quote(symbol: str) -> Optional[Quote]:
         return Quote(**cached)
 
     try:
-        ticker = yf.Ticker(symbol)
-        info = ticker.info
-
-        if not info:
-            return None
-
-        current_price = _get_current_price(info)
-        if current_price == 0.0:
-            return None
-
-        previous_close = _safe_float(
-            info.get("previousClose") or
-            info.get("regularMarketPreviousClose")
+        df = yf.download(
+            symbol,
+            period="2d",
+            interval="1d",
+            auto_adjust=True,
+            progress=False
         )
-
+        
+        if df is None or df.empty:
+            print(f"yfinance download returned empty for {symbol}")
+            return None
+        
+        if hasattr(df.columns, 'levels'):
+            df.columns = df.columns.droplevel(1)
+            
+        latest = df.iloc[-1]
+        prev = df.iloc[-2] if len(df) > 1 else df.iloc[-1]
+        
+        current_price = float(latest['Close'])
+        previous_close = float(prev['Close'])
+        
+        if current_price <= 0:
+            return None
+        
         change = current_price - previous_close
         change_percent = (change / previous_close * 100) if previous_close else 0.0
 
-        exchange_code = info.get("exchange", "")
-        exchange = EXCHANGE_MAP.get(exchange_code, exchange_code)
-
+        name = symbol
+        exchange = "NYSE"
+        currency = "USD"
+        volume = int(float(latest.get('Volume', 0) or 0))
+        
+        try:
+            ticker = yf.Ticker(symbol)
+            info   = ticker.fast_info   # fast_info is lighter than .info
+            name   = getattr(info, 'quote_type', symbol) or symbol
+            currency = getattr(info, 'currency', 'USD') or 'USD'
+            volume   = getattr(info, 'three_month_average_volume', volume) or volume
+        except Exception:
+            pass
+        
         quote = Quote(
             symbol=symbol,
-            name=info.get("shortName") or info.get("longName", symbol),
+            name=name,
             price=round(current_price, 4),
             change=round(change, 4),
             change_percent=round(change_percent, 4),
-            volume=int(info.get("volume") or info.get("regularMarketVolume") or 0),
-            currency=info.get("currency", "USD"),
+            volume=volume,
+            currency=currency,
             exchange=exchange,
             delay_minutes=15
         )

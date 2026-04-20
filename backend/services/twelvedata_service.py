@@ -12,7 +12,7 @@ async def get_quote(symbol: str) -> Optional[dict]:
         return cached
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get (
                 f"{BASE_URL}/quote",
                 params = {
@@ -58,7 +58,7 @@ async def get_history(
         return cached
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(
                 f"{BASE_URL}/time_series",
                 params = {
@@ -120,7 +120,7 @@ async def get_technical_indicator(
         return cached
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(
                 f"{BASE_URL}/{indicator}",
                 params = {

@@ -70,7 +70,7 @@ async def get_guardian_news(query: str = "financial markets") -> List[dict]:
         return cached
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=15.0) as client:
             response = await client.get(
                 "https://content.guardianapis.com/search",
                 params = {
@@ -122,7 +122,7 @@ async def get_symbol_news(symbols: List[str]) -> List[dict]:
         return cached
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=15.0) as client:
             response = await client.get(
                 "https://gnews.io/api/v4/search",
                 params={
