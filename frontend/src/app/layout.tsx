@@ -23,13 +23,11 @@ export default function RootLayout({
             <body style={{ margin: 0, padding: 0, overflow: 'hidden' }}>
                 <ThemeProvider theme={terminalTheme}>
                     <CssBaseline />
-                    <AuthProvider>
                         <ToastProvider>
                             <AppShell>
                                 {children}
                             </AppShell>
                         </ToastProvider>
-                    </AuthProvider>
                 </ThemeProvider>
             </body>
         </html>

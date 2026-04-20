@@ -16,14 +16,9 @@ router = APIRouter()
 @router.get("/quote/{symbol}", response_model=Quote)
 async def get_quote(symbol: str):
     symbol = symbol.upper()
-    result = None
-    
-    if polygon_service.is_available():
-        result = polygon_service.get_quote(symbol)
+    result = yfinance_service.get_quote(symbol)
     if not result:
-        result = yfinance_service.get_quote(symbol)
-    if not result:
-        raise HTTPException(status_code = 404, detail=f"Symbol {symbol} not found")
+            raise HTTPException(status_code = 404, detail=f"Symbol {symbol} not found")
     
     return result
 
@@ -33,17 +28,15 @@ async def get_history(
     period: str = "1mo",
     interval: str = "1d"
 ):
-    result = None
-    if polygon_service.is_available():
-        result = polygon_service.get_history(symbol, period, interval)
-    if not result:
-        result = yfinance_service.get_history(symbol, period, interval)
+    symbol = symbol.upper()
+    result = yfinance_service.get_history(symbol, period, interval)
+    
     if not result:
         raise HTTPException(status_code=404, detail=f"No history found for {symbol}")
     
     return result
 
-@router.get("/stats/{symbol}", response_model = MarketStat)
+@router.get("/stats/{symbol}", response_model=MarketStat)
 async def get_stats(symbol: str):
     result = yfinance_service.get_stats(symbol.upper())
     if not result:

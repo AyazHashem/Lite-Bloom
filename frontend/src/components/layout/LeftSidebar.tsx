@@ -150,33 +150,10 @@ export default function LeftSidebar({ isOpen, onToggle}: LeftSidebarProps) {
                 ))}
             </Box>
             <Divider sx={{ borderColor: '#21262d' }}/>
-            <Box sx={{ py: 1 }}>
+            <Box sx={{ py: 1, borderTop: '1px solid #21262d' }}>
                 {BOTTOM_ITEMS.map(item => (
                     <NavItem key={item.path} {...item} />
                 ))}
-                <Box
-                sx={{
-                    display:        'flex',
-                    alignItems:     'center',
-                    justifyContent: isOpen ? 'flex-start' : 'center',
-                    px:             isOpen ? 1.5 : 0,
-                    py:             1,
-                }}
-                >
-                    <UserMenu />
-                    {isOpen && (
-                        <Typography
-                        sx={{
-                            fontSize:   '0.72rem',
-                            color:      '#7d8590',
-                            ml:         1,
-                            fontFamily: 'monospace',
-                        }}
-                        >
-                            Account
-                        </Typography>
-                    )}
-                </Box>
             </Box>
         </Box>
     )

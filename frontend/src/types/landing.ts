@@ -67,5 +67,3 @@ export interface ExchangeData {
 }
 
 export type SortMode = 'gain' | 'volume'
-
-import { ExchangeConfig } from "@/lib/exchangeConfig"

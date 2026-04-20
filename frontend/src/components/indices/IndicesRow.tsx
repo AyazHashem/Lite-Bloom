@@ -3,7 +3,7 @@
 import { Box, Typography, Collapse } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
-import Sparkline from '@/components/shared/SparkLine'
+import Sparkline from '@/components/shared/Sparkline'
 import PriceChange from '@/components/shared/PriceChange'
 import WatchlistButton from '@/components/shared/WatchlistButton'
 import IndicesRowExpanded from './IndicesRowExpanded'

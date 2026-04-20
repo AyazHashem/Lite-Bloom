@@ -24,6 +24,11 @@ import {
     DEFAULT_CHART_PERIOD,
     DEFAULT_CHART_INTERVAL,
 } from '@/lib/constants'
+import SentimentButton from '@/components/ai/SentimentButton'
+import SentimentModal from '@/components/ai/SentimentModal'
+import { SentimentResult } from '@/types/sentiment'
+import { ChartSkeleton } from '@/components/shared/LoadingSkeleton'
+import ErrorBoundary from '@/components/shared/ErrorBoundary'
 
 interface ChartPanelProps {
     symbol:       string
@@ -72,6 +77,15 @@ export default function ChartPanel({
         setSymName(name)
     }, [])
 
+    const [sentimentResult,     setSentimentResult]     = useState<SentimentResult | null>(null)
+    const [sentimentModalOpen,  setSentimentModalOpen]  = useState(false)
+
+    const handleShowSentiment = (result: SentimentResult) => {
+        setSentimentResult(result)
+        setSentimentModalOpen(true)
+    }
+
+
     const changeColor = getChangeColor(quote?.change_percent)
     const currencySymbol = CURRENCY_SYMBOLS[quote?.currency ?? 'USD'] ?? '$'
 
@@ -100,7 +114,7 @@ export default function ChartPanel({
     ] : []
 
     return (
-        <Box
+        <Box        
         onClick={onFocus}
         sx={{
             display:       'flex',
@@ -214,7 +228,7 @@ export default function ChartPanel({
                         zIndex:          1,
                     }}
                     >
-                        <CircularProgress size={28} sx={{ color: '#1f6feb' }} />
+                        <ChartSkeleton />
                     </Box>
                 )}
 
@@ -271,6 +285,18 @@ export default function ChartPanel({
                         compact
                         />
                     ))}
+                    <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center' }}>
+                        <SentimentButton
+                        symbol={symbol}
+                        name={quote?.name ?? symbol}
+                        onShowDetails={handleShowSentiment}
+                        />
+                    </Box>
+                    <SentimentModal
+                    open={sentimentModalOpen}
+                    result={sentimentResult}
+                    onClose={() => setSentimentModalOpen(false)}
+                    />
                 </Box>
             )}
         </Box>

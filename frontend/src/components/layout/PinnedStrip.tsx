@@ -33,7 +33,7 @@ export default function PinnedStrip() {
                     } catch {}
                 })
             )
-            setQuotes(result)
+            setQuotes(results)
         }
 
         fetchQuotes()

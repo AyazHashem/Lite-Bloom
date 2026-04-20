@@ -10,6 +10,8 @@ import {
 } from '@mui/material'
 import ExchangeCard from './ExchangeCard'
 import { useMarkets } from '@/hooks/useLandingData'
+import { ExchangeCardSkeleton } from '@/components/shared/LoadingSkeleton'
+import ErrorBoundary from '@/components/shared/ErrorBoundary'
 
 type SortMode = 'gain' | 'volume'
 
@@ -69,8 +71,10 @@ export default function MarketOverview() {
             </Box>
       {/* Exchange cards */}
             {loading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                <CircularProgress size={28} sx={{ color: '#1f6feb' }} />
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    {[1, 2, 3, 4, 5].map(i => (
+                        <ExchangeCardSkeleton key={i} />
+                    ))}
                 </Box>
             ) : (
                 <Box

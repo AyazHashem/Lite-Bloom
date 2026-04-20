@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Box, Typography, CircularProgress, Tab, Tabs } from '@mui/material'
 import NewsItem from './NewsItem'
 import { useNewsfeed } from '@/hooks/useNewsfeed'
-
+import { NewsfeedSkeleton } from '@/components/shared/LoadingSkeleton'
 interface NewsfeedPanelProps {
     activeSymbols?: string[]
 }
@@ -175,8 +175,8 @@ export default function NewsfeedPanel({
             }}
             >
                 {(tab === 0 ? generalLoading : relevantLoading) ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2, mt: 'auto' }}>
-                        <CircularProgress size={18} sx={{ color: '#1f6feb' }} />
+                    <Box sx={{ mt: 'auto' }}>
+                        <NewsfeedSkeleton />
                     </Box>
                     ) : (
                         <>

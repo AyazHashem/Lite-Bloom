@@ -7,7 +7,7 @@ import ChartPanel from './ChartPanel'
 import SearchBar from '@/components/shared/SearchBar'
 import { MAX_CHARTS, DEFAULT_CHART_SYMBOL } from '@/lib/constants'
 import FocusMode from './FocusMode'
-
+import ErrorBoundary from '@/components/shared/ErrorBoundary'
 
 interface ChartEntry {
     id:     number
@@ -170,24 +170,26 @@ export default function ChartGrid() {
             }}
             >
                 {charts.map((chart, index) => (
-                    <Box
-                    key={chart.id}
-                    onDoubleClick={() => setFocusModeChart(chart)}
-                    sx={{
-                        gridArea:  getGridArea(index, count),
-                        minHeight: 0,
-                        minWidth:  0,
-                        cursor: 'pointer'
-                    }}
-                    >
-                        <ChartPanel
-                        symbol={chart.symbol}
-                        onClose={() => removeChart(chart.id)}
-                        onFocus={() => setFocusedId(chart.id)}
-                        isFocused={focusedId === chart.id}
-                        showClose={charts.length > 1}
-                        />
-                    </Box>
+                    <ErrorBoundary key={chart.id} label={chart.symbol}>
+                        <Box
+                        key={chart.id}
+                        onDoubleClick={() => setFocusModeChart(chart)}
+                        sx={{
+                            gridArea:  getGridArea(index, count),
+                            minHeight: 0,
+                            minWidth:  0,
+                            cursor: 'pointer'
+                        }}
+                        >
+                            <ChartPanel
+                            symbol={chart.symbol}
+                            onClose={() => removeChart(chart.id)}
+                            onFocus={() => setFocusedId(chart.id)}
+                            isFocused={focusedId === chart.id}
+                            showClose={charts.length > 1}
+                            />
+                        </Box>
+                    </ErrorBoundary>
                 ))}
                 {focusModeChart && (
                     <FocusMode

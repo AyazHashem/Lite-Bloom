@@ -13,6 +13,7 @@ import {
 } from '@mui/material'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/components/shared/ToastNotification'
 
 export default function RegisterForm() {
     const { register } = useAuth()
@@ -24,6 +25,7 @@ export default function RegisterForm() {
     const [error,     setError]     = useState<string | null>(null)
     const [success,   setSuccess]   = useState(false)
     const [loading,   setLoading]   = useState(false)
+    const { showToast } = useToast()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -50,10 +52,12 @@ export default function RegisterForm() {
 
         if (authError) {
             setError(authError)
+            showToast(authError, 'error')
             setLoading(false)
         } else {
       // Supabase sends a confirmation email by default
       // Show success message and redirect to login
+            showToast('Account created — check your email to confirm.', 'success')
             setSuccess(true)
             setLoading(false)
             setTimeout(() => router.push('/login'), 3000)

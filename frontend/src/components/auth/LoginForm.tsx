@@ -13,6 +13,7 @@ import {
 } from '@mui/material'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/components/shared/ToastNotification'
 
 export default function LoginForm() {
     const { login }  = useAuth()
@@ -22,6 +23,7 @@ export default function LoginForm() {
     const [password, setPassword] = useState('')
     const [error,    setError]    = useState<string | null>(null)
     const [loading,  setLoading]  = useState(false)
+    const { showToast } = useToast()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -37,8 +39,10 @@ export default function LoginForm() {
 
         if (authError) {
             setError(authError)
+            showToast(authError, 'error')
             setLoading(false)
         } else {
+            showToast('Welcome back!', 'success')
             router.push('/')
         }
     }

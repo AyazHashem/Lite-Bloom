@@ -7,6 +7,7 @@ import IndicesTable from '@/components/indices/IndicesTable'
 import { useExchangeIndices } from '@/hooks/useIndicesData'
 import { useMarkets } from '@/hooks/useLandingData'
 import { EXCHANGES } from '@/lib/exchangeConfig'
+import ErrorBoundary from '@/components/shared/ErrorBoundary'
 
 export default function IndicesPage() {
     const [selection, setSelection] = useState({
@@ -113,11 +114,13 @@ export default function IndicesPage() {
                         </Typography>
                     </Box>
                     ) : (
-                        <IndicesTable
-                        stocks={filteredStocks}
-                        loading={loading}
-                        isMarketOpen={true}
-                        />
+                        <ErrorBoundary label="Indices Table">
+                            <IndicesTable
+                            stocks={filteredStocks}
+                            loading={loading}
+                            isMarketOpen={true}
+                            />
+                        </ErrorBoundary>
                 )}
             </Box>
         </Box>
